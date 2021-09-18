@@ -1,8 +1,6 @@
 package labTwo;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Matrix
@@ -24,20 +22,28 @@ public class Matrix
       if (line != null)
       {
         String[] stringArr = line.split(" ");
-        if (stringArr.length != 1)
+        if (stringArr.length > 1)
         {
-          throw new IllegalArgumentException("Expected one number");
+          throw new MultipleNumbersInFile();
+        }
+        else if (stringArr.length < 1)
+        {
+          throw new EmptyFile();
         }
 
         N = Integer.parseInt(stringArr[0]);
         if (N > (10^6))
         {
-          throw new IllegalArgumentException("Array parameters cannot be greater than 10^6");
+          throw new InvalidMatrixSize();
         }
 
         this.matrix = new double [N][N];
         this.fillMatrix();
       }
+    }
+    catch (InvalidMatrixSize | MultipleNumbersInFile | EmptyFile e)
+    {
+      System.out.println(e.getMessage());
     }
     catch (IOException e)
     {
@@ -57,8 +63,8 @@ public class Matrix
       }
     }
   }
-  
-  public void divide()
+
+  private void divide()
   {
     double[][] tempMatrix = new double[matrix.length][matrix.length];
     for (int i = 0; i < matrix.length; i++)
@@ -75,10 +81,9 @@ public class Matrix
       for (int j = 0; j < matrix.length; j++)
       {
         sumAround = sumAroundIndex(i, j);
-        //System.out.println(sumAround);
         if (Math.abs(sumAround - 0) < (10^(-3)))
         {
-          throw new IllegalArgumentException("Cannot divide by zero");
+          throw new DivideByZero();
         }
         tempMatrix[i][j] = matrix[i][j] / sumAround;
       }
@@ -132,8 +137,23 @@ public class Matrix
       {
         System.out.print(matrix[i][j] + " ");
       }
+
       System.out.println();
     }
+
     System.out.println();
+  }
+
+  public void printToFile(FileWriter writer) throws IOException
+  {
+    for (int i = 0; i < matrix.length; ++i)
+    {
+      for (int j = 0; j < matrix.length; ++j)
+      {
+        writer.write(matrix[i][j] + " ");
+      }
+
+      writer.write("\n");
+    }
   }
 }
