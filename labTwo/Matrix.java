@@ -1,13 +1,15 @@
-package labTwo;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Matrix
 {
   private double [][] matrix;
 
-  Matrix()
+  public Matrix()
   {
     this.readFromFile();
   }
@@ -16,7 +18,7 @@ public class Matrix
   {
     int N;
 
-    try(BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\deniz\\IdeaProjects\\Lab2\\src\\labTwo\\matrixSize.txt")))
+    try(BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\Deniz\\IdeaProjects\\LabTwo\\matrixSize.txt")))
     {
       String line = reader.readLine();
       if (line != null)
@@ -24,24 +26,24 @@ public class Matrix
         String[] stringArr = line.split(" ");
         if (stringArr.length > 1)
         {
-          throw new MultipleNumbersInFile();
+          throw new MultipleNumbersInFileException();
         }
         else if (stringArr.length < 1)
         {
-          throw new EmptyFile();
+          throw new EmptyFileException();
         }
 
         N = Integer.parseInt(stringArr[0]);
         if (N > (10^6))
         {
-          throw new InvalidMatrixSize();
+          throw new InvalidMatrixSizeException();
         }
 
         this.matrix = new double [N][N];
         this.fillMatrix();
       }
     }
-    catch (InvalidMatrixSize | MultipleNumbersInFile | EmptyFile e)
+    catch (InvalidMatrixSizeException | MultipleNumbersInFileException | EmptyFileException e)
     {
       System.out.println(e.getMessage());
     }
@@ -64,31 +66,40 @@ public class Matrix
     }
   }
 
-  private void divide()
+  public void divide()
   {
-    double[][] tempMatrix = new double[matrix.length][matrix.length];
-    for (int i = 0; i < matrix.length; i++)
+    try
     {
-      for (int j = 0; j < matrix.length; j++)
+      double[][] tempMatrix = new double[matrix.length][matrix.length];
+      for (int i = 0; i < matrix.length; i++)
       {
-        tempMatrix[i][j] = matrix[i][j];
-      }
-    }
-
-    double sumAround;
-    for (int i = 0; i < matrix.length; i++)
-    {
-      for (int j = 0; j < matrix.length; j++)
-      {
-        sumAround = sumAroundIndex(i, j);
-        if (Math.abs(sumAround - 0) < (10^(-3)))
+        for (int j = 0; j < matrix.length; j++)
         {
-          throw new DivideByZero();
+          tempMatrix[i][j] = matrix[i][j];
         }
-        tempMatrix[i][j] = matrix[i][j] / sumAround;
       }
+
+      double sumAround;
+      for (int i = 0; i < matrix.length; i++)
+      {
+        for (int j = 0; j < matrix.length; j++)
+        {
+          sumAround = sumAroundIndex(i, j);
+          if (Math.abs(sumAround - 0) <= 0.000001)
+          {
+            //throw new DivideByZeroException();
+            System.out.println("Cannot divide by zero");
+            continue;
+          }
+          tempMatrix[i][j] = matrix[i][j] / sumAround;
+        }
+      }
+      matrix = tempMatrix;
     }
-    matrix = tempMatrix;
+    catch (DivideByZeroException e)
+    {
+      System.out.println(e.getMessage());
+    }
   }
 
   private double sumAroundIndex(int i, int j)
